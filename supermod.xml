@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<mod>
+    <hooks>
+        <group hook_id="lib/">
+			<group :hook_id="units/">
+				<group :hook_id="enemies/cop/">
+					<post :hook_id="actions/lower_body/copactionidle" script_path="StealthFix.lua" />
+					<post :hook_id="logics/coplogicidle" script_path="StealthFix.lua" />
+					<post :hook_id="copbase" script_path="StealthFix.lua" />
+				</group>
+
+				<post :hook_id="weapons/raycastweaponbase" script_path="StealthFix.lua" />
+			</group>
+
+			<post :hook_id="managers/group_ai_states/groupaistatebase" script_path="StealthFix.lua" />
+        </group>
+
+    </hooks>
+</mod>
