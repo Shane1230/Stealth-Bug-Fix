@@ -13,22 +13,32 @@ if RequiredScript == "lib/managers/group_ai_states/groupaistatebase" then
 elseif RequiredScript == "lib/units/enemies/cop/actions/lower_body/copactionidle" then
 	-- copactionidle
 	Hooks:PostHook(CopActionIdle, "update", "update_head_pos", function(self, t)
-		if self._ext_anim.base_need_upd then
+		if self._ext_anim.base_need_upd and managers.groupai:state():whisper_mode() then
 			self._ext_movement:upd_m_head_pos()
 		end
 	end)
 
 elseif RequiredScript == "lib/units/enemies/cop/copbase" then
 	-- copbase
+
 	Hooks:PostHook(CopBase, "post_init", "add_init", function(self, ...)
-		self._allow_invisible = true
+		if managers.groupai:state():whisper_mode() then
+			self._allow_invisible = true
+		end
 	end)
 
 	function CopBase:set_allow_invisible(allow)
-		self._allow_invisible = allow
+		if managers.groupai:state():whisper_mode() then
+			self._allow_invisible = allow
+		end
 	end
 
+	local CopBase_set_visibility_state_original = CopBase.set_visibility_state
 	function CopBase:set_visibility_state(stage)
+		if not managers.groupai:state():whisper_mode() then
+			return CopBase_set_visibility_state_original(self, stage, ...)
+		end
+
 		local state = stage and true
 
 		if not state and not self._allow_invisible then
@@ -103,7 +113,12 @@ elseif RequiredScript == "lib/units/enemies/cop/logics/coplogicidle" then
 
 elseif RequiredScript == "lib/units/weapons/raycastweaponbase" then
 	-- raycastweaponbase
+	--local RaycastWeaponBase_collect_hits_original = RaycastWeaponBase.collect_hits
 	function RaycastWeaponBase.collect_hits(from, to, setup_data)
+		--[[if managers.groupai:state():whisper_mode() then
+			return RaycastWeaponBase_collect_hits_original(from, to, setup_data)
+		end--]]
+
 		setup_data = setup_data or {}
 		local ray_hits = nil
 		local hit_enemy = false
