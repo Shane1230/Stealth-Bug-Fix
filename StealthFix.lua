@@ -36,7 +36,7 @@ elseif RequiredScript == "lib/units/enemies/cop/copbase" then
 	local CopBase_set_visibility_state_original = CopBase.set_visibility_state
 	function CopBase:set_visibility_state(stage)
 		if not managers.groupai:state():whisper_mode() then
-			return CopBase_set_visibility_state_original(self, stage, ...)
+			return CopBase_set_visibility_state_original(self, stage)
 		end
 
 		local state = stage and true

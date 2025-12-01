@@ -3,7 +3,7 @@
 	"description" : "Fixes many stealth bugs",
 	"author" : "Shane",
 	"Contact" : "https://steamcommunity.com/id/Shane1230/",
-	"version" : "0.51",
+	"version" : "0.52",
 	"priority": 1,
 
 	"supermod_definition" : "supermod.xml",
