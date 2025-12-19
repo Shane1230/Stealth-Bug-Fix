@@ -1,8 +1,8 @@
 if RequiredScript == "lib/managers/group_ai_states/groupaistatebase" then
-	-- groupaistatebase
+	-- scram bug fix
 	local propagate_alert_original = GroupAIStateBase.propagate_alert
 	function GroupAIStateBase:propagate_alert(alert_data, ...)
-		if Network:is_server() and managers and managers.groupai and managers.groupai:state() and managers.groupai:state():whisper_mode() then
+		if Network:is_server() and managers.groupai:state():whisper_mode() then
 			if (alert_data[1] and alert_data[1] == "vo_distress") and (alert_data[3] and alert_data[3] > 200) then
 				alert_data[3] = 25
 			end
@@ -11,114 +11,17 @@ if RequiredScript == "lib/managers/group_ai_states/groupaistatebase" then
 	end
 
 elseif RequiredScript == "lib/units/enemies/cop/actions/lower_body/copactionidle" then
-	-- copactionidle
+	-- civ exclamation pos fix
 	Hooks:PostHook(CopActionIdle, "update", "update_head_pos", function(self, t)
 		if self._ext_anim.base_need_upd and managers.groupai:state():whisper_mode() then
+		--if self._ext_anim.crouch and managers.groupai:state():whisper_mode() then
 			self._ext_movement:upd_m_head_pos()
 		end
 	end)
 
-elseif RequiredScript == "lib/units/enemies/cop/copbase" then
-	-- copbase
-
-	Hooks:PostHook(CopBase, "post_init", "add_init", function(self, ...)
-		if managers.groupai:state():whisper_mode() then
-			self._allow_invisible = true
-		end
-	end)
-
-	function CopBase:set_allow_invisible(allow)
-		if managers.groupai:state():whisper_mode() then
-			self._allow_invisible = allow
-		end
-	end
-
-	local CopBase_set_visibility_state_original = CopBase.set_visibility_state
-	function CopBase:set_visibility_state(stage)
-		if not managers.groupai:state():whisper_mode() then
-			return CopBase_set_visibility_state_original(self, stage)
-		end
-
-		local state = stage and true
-
-		if not state and not self._allow_invisible then
-			state = true
-			stage = 1
-		elseif not state and self._prevent_invisible then
-			stage = math.max(stage or 1, 3)
-			state = true
-		end
-
-		if self._force_invisible then
-			self._lod_stage = stage
-
-			return
-		end
-
-		if self._lod_stage == stage then
-			return
-		end
-
-		if self._visibility_state ~= state then
-			self:_update_visibility_state(state)
-		end
-
-		if state then
-			if self._unit:movement() and self._unit:movement().enable_update then
-				self._unit:movement():enable_update(true)
-			end
-			
-			if stage == 1 then
-				self._unit:set_animatable_enabled(Idstring("lod1"), true)
-			elseif self._lod_stage == 1 then
-				self._unit:set_animatable_enabled(Idstring("lod1"), false)
-			end
-		end
-
-		self:set_anim_lod(stage)
-
-		self._lod_stage = stage
-
-		self:chk_freeze_anims()
-	end
-
-elseif RequiredScript == "lib/units/enemies/cop/logics/coplogicidle" then
-	-- coplogicidle
-	Hooks:PostHook(CopLogicIdle, "_chk_relocate", "fix_follow_unit", function(data)
-		if data.objective and data.objective.type == "follow" then
-			local relocate = nil
-			local follow_unit = data.objective.follow_unit
-			local advance_pos = follow_unit:brain() and follow_unit:brain():is_advancing()
-			local follow_unit_pos = advance_pos or (follow_unit:movement() and follow_unit:movement().m_newest_pos and follow_unit:movement():m_newest_pos())
-
-			if data.objective.relocated_to and mvector3.equal(data.objective.relocated_to, follow_unit_pos) then
-				return
-			end
-
-			if data.objective.distance and data.objective.distance < mvector3.distance(data.m_pos, follow_unit_pos) then
-				relocate = true
-			end
-
-			if relocate then
-				data.objective.in_place = nil
-				data.objective.nav_seg = follow_unit:movement():nav_tracker():nav_segment()
-				data.objective.relocated_to = mvector3.copy(follow_unit_pos)
-
-				data.logic._exit(data.unit, "travel")
-
-				return true
-			end
-		end
-	end)
-
 elseif RequiredScript == "lib/units/weapons/raycastweaponbase" then
-	-- raycastweaponbase
-	--local RaycastWeaponBase_collect_hits_original = RaycastWeaponBase.collect_hits
+	-- shot through fix
 	function RaycastWeaponBase.collect_hits(from, to, setup_data)
-		--[[if managers.groupai:state():whisper_mode() then
-			return RaycastWeaponBase_collect_hits_original(from, to, setup_data)
-		end--]]
-
 		setup_data = setup_data or {}
 		local ray_hits = nil
 		local hit_enemy = false
