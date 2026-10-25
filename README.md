@@ -1,4 +1,4 @@
-# Stealth Bug Fix (beta test 0.6)
+# Stealth Bug Fix
 
 - Scream Bug Fix (host side)<br>
   <img src = "https://storage.modworkshop.net/mods/images/59722_1675647146_ad5664171452d6c5147aab97f36b097f.gif" width="50%" height="50%">
@@ -7,8 +7,8 @@
 - Civilian head pos Fix (client side / U240.3)<br>
   <img src = "https://i.imgur.com/GJemGR9.jpeg" width="50%" height="50%">
 
-- civilian, hostaged cops can through bullet fix (client side / U173)
-  > shotgunbase.lua - shotgun through bug (U236 but solved at raycastweaponbase)
+- Civilian, hostaged cops can through bullet fix (client side / U173)
+  > shotgunbase.lua - shotgun through bug (U236 but solved at U173 raycastweaponbase.lua)
   - https://i.imgur.com/y0oVMnh.gif
   - https://i.imgur.com/ikVkJQo.gif
 <hr>

@@ -23,7 +23,8 @@ elseif RequiredScript == "lib/units/weapons/raycastweaponbase" then
 	-- shot through fix
 	function RaycastWeaponBase.collect_hits(from, to, setup_data)
 		setup_data = setup_data or {}
-		local ray_hits = nil
+
+		local ray_hits
 		local hit_enemy = false
 		local ignore_unit = setup_data.ignore_units or {}
 		local enemy_mask = setup_data.enemy_mask
@@ -31,6 +32,7 @@ elseif RequiredScript == "lib/units/weapons/raycastweaponbase" then
 
 		if setup_data.stop_on_impact then
 			ray_hits = {}
+
 			local hit = World:raycast("ray", from, to, "slot_mask", bullet_slotmask, "ignore_unit", ignore_unit)
 
 			if hit then
@@ -60,49 +62,51 @@ elseif RequiredScript == "lib/units/weapons/raycastweaponbase" then
 
 		local unique_hits = {}
 		local enemies_hit = {}
-		local unit, u_key, is_enemy = nil
-		local units_hit = {}
-		local in_slot_func = Unit.in_slot
-		local has_ray_type_func = Body.has_ray_type
 
-		local function is_surrendered(unit) -- add dominated cop function
-			local anim = unit:anim_data()
-			if not anim then
+		do
+			local unit, u_key, is_enemy
+			local units_hit = {}
+			local in_slot_func = Unit.in_slot
+			local has_ray_type_func = Body.has_ray_type
+
+			local function is_surrendered(unit) -- add dominated cop function
+				local anim = unit:anim_data()
+				if not anim then
+					return false
+				end
+				
+				if anim.hands_up or anim.hands_back or anim.surrender or anim.tied then
+					return true
+				end
+
 				return false
 			end
-			
-			if anim.hands_up or anim.hands_back or anim.surrender or anim.tied then
-				return true
-			end
 
-			return false
-		end
+			for i, hit in ipairs(ray_hits) do
+				unit = hit.unit
+				u_key = unit:key()
 
-		for i, hit in ipairs(ray_hits) do
-			unit = hit.unit
-			u_key = unit:key()
+				if not units_hit[u_key] then
+					units_hit[u_key] = true
+					unique_hits[#unique_hits + 1] = hit
+					hit.hit_position = hit.position
+					is_enemy = in_slot_func(unit, enemy_mask)
 
-			if not units_hit[u_key] then
-				units_hit[u_key] = true
-				unique_hits[#unique_hits + 1] = hit
-				hit.hit_position = hit.position
-				is_enemy = in_slot_func(unit, enemy_mask)
+					if is_enemy then
+						enemies_hit[u_key] = unit
+						hit_enemy = true
+					end
 
-				if is_enemy then
-					enemies_hit[u_key] = unit
-					hit_enemy = true
-				end
-
-				local tweak = hit.unit:base() and hit.unit:base()._tweak_table
-				if not can_shoot_through_enemy and (is_enemy or CopDamage.is_civilian(tweak) or is_surrendered(hit.unit)) then
+					local tweak = hit.unit:base() and hit.unit:base()._tweak_table
+					if not can_shoot_through_enemy and (is_enemy or CopDamage.is_civilian(tweak) or is_surrendered(hit.unit)) then
 					-- add civilian through block
-					break
-				elseif not can_shoot_through_shield and in_slot_func(unit, shield_mask) then
-					break
-				elseif not can_shoot_through_wall and in_slot_func(unit, wall_mask) and (has_ray_type_func(hit.body, ai_vision_ids) or has_ray_type_func(hit.body, bulletproof_ids)) then
-					break
+						break
+					elseif not can_shoot_through_shield and in_slot_func(unit, shield_mask) then
+						break
+					elseif not can_shoot_through_wall and in_slot_func(unit, wall_mask) and (has_ray_type_func(hit.body, ai_vision_ids) or has_ray_type_func(hit.body, bulletproof_ids)) then
+						break
+					end
 				end
-
 			end
 		end
 

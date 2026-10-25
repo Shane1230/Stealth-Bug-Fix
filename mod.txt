@@ -1,9 +1,9 @@
 {
-	"name" : "Stealth Bug Fix(beta test)",
-	"description" : "Fixes many stealth bugs",
+	"name" : "Stealth Bug Fix",
+	"description" : "Fixes stealth bugs",
 	"author" : "Shane",
 	"Contact" : "https://steamcommunity.com/id/Shane1230/",
-	"version" : "0.6",
+	"version" : "1.0",
 	"priority": 1,
 
 	"supermod_definition" : "supermod.xml",
